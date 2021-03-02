@@ -42,7 +42,6 @@ chmod a+x argonONE
 ```
 
 Place the argonONE.service file in /storage/.config/system.d/
-```
 Then enable the service and start it:
 ```
 systemctl daemon-reload
