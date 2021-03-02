@@ -1,0 +1,8 @@
+[Unit]
+Description=ArgonONE
+
+[Service]
+ExecStart=/storage/.config/argonONE
+
+[Install]
+WantedBy=multi-user.target
