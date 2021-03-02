@@ -19,25 +19,8 @@ These sources are compiled with 'musl' on a Raspbian distro. The result is
 a ~25kb static executable that has no dependencies on any libraries. It should
 run on basically any Pi4 distro.
 
-## Installation on RetroPie
-Download RetroPie here: https://retropie.org.uk/download/#Pre-made_images_for_the_Raspberry_Pi
-
-Once you are up and running and in a SSH shell, do the following:
-```
-sudo bash -login
-raspi-config nonint do_i2c 0
-cd /usr/local/sbin/
-wget https://github.com/RenHoekNL/argonONE/raw/master/argonONE
-chmod a+x argonONE
-sed -i 's~^exit 0~/usr/local/sbin/argonONE \&\nexit 0~' /etc/rc.local
-ln -s /usr/local/sbin/argonONE /lib/systemd/system-shutdown/argonONE.poweroff
-sync
-reboot
-```
-Once booted, double-clicking the power button will do a shutdown and shutdown via the menu will turn the boards power off.
-
-## Installation on Lakka
-*The following instructions are tailored to the [Lakka](http://www.lakka.tv/get/linux/rpi4/) distro:*
+## Installation on LibreElec (tested on nightly)
+download all the files and place them in /storage/.config (no sub-folder)
 
 The daemon has the following requirements:
 
@@ -46,51 +29,23 @@ The daemon has the following requirements:
 You can get the i2c-1 device by editing the config.txt file:
 ```
 mount -o remount,rw /flash
-cp -a /flash/config.txt /flash/config.ori            # Make a backup
-echo 'dtparam=i2c_arm=on'   >  /flash/config.txt     # Enable I2C device
-echo 'hdmi_force_hotplug=1' >> /flash/config.txt     # Personal preference, you can skip this one
-cat /flash/config.ori       >> /flash/config.txt     # Add the old stuff
-sync
-mount -o remount,ro /flash
-reboot
+nano /flash/config.txt
+# Enable I2C device
+dtparam=i2c_arm=on
 ```
-After reboot, check /dev for the new device
 
-Now to install the daemon, make sure it starts at boot and enable the poweroff
+Install the daemon, make sure it starts at boot:
 ```
 cd /storage/.config/
-wget https://github.com/RenHoekNL/argonONE/raw/master/argonONE
+
 chmod a+x argonONE
-ln -s argonONE argonONE.poweroff
+```
 
-cat << 'EOF' > /storage/.config/autostart.sh
-(
- /storage/.config/argonONE &
-) &
-EOF
-
-cat << 'EOF' > /storage/.config/system.d/argonONE.service
-[Unit]
-Description=ArgonONE poweroff
-
-[Service]
-Type=oneshot
-RemainAfterExit=true
-ExecStop=/storage/.config/argonONE.poweroff
-
-[Install]
-WantedBy=multi-user.target
-EOF
+Place the argonONE.service file in /storage/.config/system.d/
+```
+Then enable the service and start it:
+```
+systemctl daemon-reload
 systemctl enable argonONE
 systemctl start argonONE
 ```
-
-## Installation on Raspbian
-- Enable the I2C device. See the instructions above. Instead of `/flash`, use `/boot`
-```
-cd /usr/local/sbin
-wget https://github.com/RenHoekNL/argonONE/raw/master/argonONE
-chmod a+x argonONE
-ln -s /usr/local/sbin/argonONE /lib/systemd/system-shutdown/argonONE.poweroff
-```
-- Edit `/etc/rc.local` and put in `/usr/local/sbin/argonONE &`
