@@ -46,6 +46,8 @@ Place the argonONE.service file in /storage/.config/system.d/
 Then enable the service and start it:
 ```
 systemctl daemon-reload
+
 systemctl enable argonONE
+
 systemctl start argonONE
 ```
